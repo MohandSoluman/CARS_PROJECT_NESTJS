@@ -22,8 +22,9 @@ export class AuthenticationService {
     const result = salt + '.' + hash.toString('hex');
     user.password = result;
     // create and save user
-    await this.usersService.createUser(user);
-    return result;
+    const savedUser = await this.usersService.create(user.email, user.password);
+
+    return savedUser;
   }
 
   async signIn(sinedUser: CreateUserDto) {
@@ -40,7 +41,6 @@ export class AuthenticationService {
     if (hashedPassword !== hash.toString('hex')) {
       throw new BadRequestException('bad password');
     }
-    console.log(user);
 
     return user;
   }

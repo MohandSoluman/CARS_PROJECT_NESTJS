@@ -1,50 +1,81 @@
-import { UsersService } from './users.service';
 import {
   Body,
   Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
   Post,
+  Get,
+  Patch,
+  Delete,
+  Param,
   Query,
+  NotFoundException,
+  Session,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { Serialize } from 'src/interseptors/serialize.interceptor';
+import { UsersService } from './users.service';
+
 import { UserDto } from './dtos/user.dto';
-import { AuthenticationService } from './authentication.service';
+import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { User } from './user.entity';
+import { AuthGuard } from '../guards/auth.guard';
+import { Serialize } from 'src/interseptors/serialize.interceptor';
 
 @Controller('auth')
 @Serialize(UserDto)
 export class UsersController {
   constructor(
     private usersService: UsersService,
-    private authenticationService: AuthenticationService,
+    private authService: AuthService,
   ) {}
+
+  @Get('/whoami')
+  @UseGuards(AuthGuard)
+  whoAmI(@CurrentUser() user: User) {
+    return user;
+  }
+
+  @Post('/signout')
+  signOut(@Session() session: any) {
+    session.userId = null;
+  }
+
   @Post('/signup')
-  async signUp(@Body() body: CreateUserDto) {
-    await this.authenticationService.signUp(body);
+  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signup(body.email, body.password);
+    session.userId = user.id;
+    return user;
   }
+
   @Post('/signin')
-  async signIn(@Body() body: CreateUserDto) {
-    await this.authenticationService.signIn(body);
+  async signin(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signin(body.email, body.password);
+    session.userId = user.id;
+    return user;
   }
+
   @Get('/:id')
-  async getUser(@Param('id') id: string) {
-    return await this.usersService.findOne(+id);
+  async findUser(@Param('id') id: string) {
+    const user = await this.usersService.findOne(parseInt(id));
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    return user;
   }
+
   @Get()
-  async getAllUsers(@Query('email') email: string) {
-    return await this.usersService.find(email);
+  findAllUsers(@Query('email') email: string) {
+    return this.usersService.find(email);
   }
 
   @Delete('/:id')
-  async deleteUser(@Param('id') id: string) {
-    return await this.usersService.removeUser(+id);
+  removeUser(@Param('id') id: string) {
+    return this.usersService.remove(parseInt(id));
   }
+
   @Patch('/:id')
-  async updateUser(@Param('id') id: string, @Body() data: UpdateUserDto) {
-    return this.usersService.updataUser(+id, data);
+  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    return this.usersService.update(parseInt(id), body);
   }
 }

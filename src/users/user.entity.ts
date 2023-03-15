@@ -1,17 +1,14 @@
-import { Logger } from '@nestjs/common';
-
 import {
   AfterInsert,
+  AfterRemove,
+  AfterUpdate,
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  AfterRemove,
-  AfterUpdate,
 } from 'typeorm';
 
 @Entity()
 export class User {
-  [x: string]: any;
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,14 +20,16 @@ export class User {
 
   @AfterInsert()
   logInsert() {
-    Logger.log(`inserted user with ID ${this.id}....................`);
+    console.log('Inserted User with id', this.id);
   }
-  @AfterRemove()
-  logRemove() {
-    Logger.log(` remove user With Id ${this.id}....................`);
-  }
+
   @AfterUpdate()
   logUpdate() {
-    Logger.log(`update user with ID ${this.id}....................`);
+    console.log('Updated User with id', this.id);
+  }
+
+  @AfterRemove()
+  logRemove() {
+    console.log('Removed User with id', this.id);
   }
 }
