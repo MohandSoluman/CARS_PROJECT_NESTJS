@@ -1,10 +1,19 @@
-### Create a new user
+### sign up
 POST http://localhost:3000/auth/signup
 content-type: application/json
 
 {
-  "email": "f@F.com",
-  "password": "ggggggggggggggg"
+  "email": "mohand@hn.com.com",
+  "password": "ggggggggggggg"
+}
+
+### sign in
+POST http://localhost:3000/auth/signin
+content-type: application/json
+
+{
+  "email": "mohand@hn.com.com",
+  "password": "ggggggggggggg"
 }
 
 #### get user by id 
