@@ -1,0 +1,20 @@
+POST http://localhost:3000/reports
+content-type: application/json
+
+{
+  "price": "66000",
+  "make":"gely",
+  "model": "f18",
+  "year": 2030,
+  "lng": 11,
+  "lat": 11,
+  "milage": 1000
+}
+
+###
+PATCH http://localhost:3000/reports/8
+content-type: application/json
+
+{
+  "approved": true
+}
